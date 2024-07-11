@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 
 const JWT_SECRET: string = process.env.JWT_SECRET!;
 
-const accessToken = (userId: number) => {
+const generateAccessToken = (userId: number) => {
     const token = jwt.sign({
         userId
     }, JWT_SECRET, {
@@ -27,4 +27,4 @@ const accessToken = (userId: number) => {
 //     });
 // }
 
-export {accessToken};
+export {generateAccessToken};
