@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from 'body-parser';
 require("dotenv").config();
+import cors from "cors";
 import connectDB from "./utils/db";
 
 const app = express();
@@ -8,6 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 connectDB();
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
