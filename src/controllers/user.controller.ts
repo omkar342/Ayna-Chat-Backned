@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import { generateAccessToken } from "../middlewares/jwt.middleware";
+import { CustomRequest } from "../middlewares/jwt.middleware";
 
 const User = require("../models/user.model");
 
@@ -13,10 +14,12 @@ const registerController = async (req: Request, res: Response) => {
     }
 
     if (password !== confirmPassword) {
-        return res.status(400).json({ message: "Password and confirm password does not match." });
+      return res
+        .status(400)
+        .json({ message: "Password and confirm password does not match." });
     }
 
-    const userExists = await User.findOne({ eamil: userEmail });
+    const userExists = await User.findOne({ email: userEmail });
 
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
@@ -33,9 +36,14 @@ const registerController = async (req: Request, res: Response) => {
 
     user.save();
 
-    res
-      .status(201)
-      .json({ success: true, message: "User created successfully" });
+    const token = await generateAccessToken(user._id);
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      userData: user,
+      accessToken: token,
+    });
   } catch (e) {
     console.log(e);
     res.status(500).json({ message: "Internal Server Error" });
@@ -64,18 +72,32 @@ const loginController = async (req: Request, res: Response) => {
 
     const token = await generateAccessToken(user._id);
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "User logged in successfully!",
-        userData: user,
-        accessToken: token,
-      });
+    res.status(200).json({
+      success: true,
+      message: "User logged in successfully!",
+      userData: user,
+      accessToken: token,
+    });
   } catch (e) {
     console.log(e);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-export { registerController, loginController };
+const loginWithTokenController = async (req: CustomRequest, res: Response) => {
+  try {
+    const user = await User.findById(req?.userId);
+
+    if (user) {
+      return res.status(200).json({ success: true, userData: user, message: "User logged in successfully!" });
+    } else {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+    
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export { registerController, loginController, loginWithTokenController };
