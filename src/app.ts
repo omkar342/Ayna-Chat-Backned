@@ -39,7 +39,6 @@ io.on("connection", (socket) => {
   // Join a specific room
   socket.on("joinRoom", (roomId) => {
     socket.join(roomId);
-    socket.to(roomId).emit("receiveMessage", "Welcome to the room " + roomId);
   });
 
   // Send message to specific room
